@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Linq;
+using System.Linq;  //Additional tools to interact with collections (e.g. lists) > "lastOf", also works on dicts/arrays/enumerables/...
+using UnityEngine.SceneManagement;
 
 public class SnekController : MonoBehaviour
 {
+    public SpawnFood FoodSpawnerScript;
     public int Score;
     public Text ScoreText;
     public bool GameOver;
-
+    private Vector2 LastMoveDir;
 
     float timeSinceLastMove = 0f;
-    public float TimeToMove = 0.15f;
+    public float TimeToMove = 0.1f;
 
     Vector2 dir = Vector2.right;
     public Transform SnekPosition;
@@ -33,9 +35,7 @@ public class SnekController : MonoBehaviour
         }
         else if (Input.anyKeyDown)
         {
-            Score = 0;
-            tail.RemoveRange(0,tail.Count);
-            SnekPosition.position = Vector2.zero;
+            SceneManager.LoadScene(0);        
         }
 
     }
@@ -56,22 +56,22 @@ public class SnekController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            if (dir != Vector2.left)
+            if (LastMoveDir != Vector2.left)
                 dir = Vector2.right;
         }
         else if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            if (dir != Vector2.up)
+            if (LastMoveDir != Vector2.up)
                 dir = Vector2.down;
         }
         else if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            if (dir != Vector2.right)
+            if (LastMoveDir != Vector2.right)
                 dir = Vector2.left;
         }
         else if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            if (dir != Vector2.down)
+            if (LastMoveDir != Vector2.down)
                 dir = Vector2.up;
         }
 
@@ -81,6 +81,7 @@ public class SnekController : MonoBehaviour
     {
         Vector2 gapPosition = transform.position;
         transform.Translate(dir);
+        LastMoveDir = dir;
 
         if (eating)
         {
@@ -91,14 +92,13 @@ public class SnekController : MonoBehaviour
         else if (tail.Count > 0)
         {
             tail.Last().position = gapPosition;
-
             tail.Insert(0, tail.Last());
             tail.RemoveAt(tail.Count - 1);
         }
     }
 
 
-    void OnTriggerEnter2D(Collider2D coll)
+    void OnTriggerEnter2D(Collider2D coll) //could also be on collision enter > then would need to untag "trigger" in other game objects
     {
         if (coll.tag == "food")
         {
@@ -109,8 +109,14 @@ public class SnekController : MonoBehaviour
         }
         else
         {
-            GameOver = true;    //doesnt currently work
+            GameOver = true;
+            FoodSpawnerScript.StopFood();
         }
     }
 
 }
+/*To do:
+ * 
+ * 
+ * 
+ * */
